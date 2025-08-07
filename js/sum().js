@@ -36,16 +36,30 @@
  *    } );
  */
 
-jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
-	return this.flatten().reduce( function ( a, b ) {
-		if ( typeof a === 'string' ) {
-			a = a.replace(/[^\d.-]/g, '') * 1;
-		}
-		if ( typeof b === 'string' ) {
-			b = b.replace(/[^\d.-]/g, '') * 1;
-		}
+jQuery.fn.dataTable.Api.register('sum()', function () {
+    return this.flatten().reduce(function (a, b) {
+        const parseValue = (val) => {
+            if (typeof val === 'string') {
+                // Remove all non-numeric characters except '.' and '-'
+                val = val.replace(/[^\d.-]/g, '');
+            }
 
-		return a + b;
-	}, 0 );
-} );
+            const num = parseFloat(val);
+
+            // Log a warning and return 0 if the parsed value is not a valid number
+            if (isNaN(num)) {
+                console.warn('Ignored non-numeric value in sum():', val);
+                return 0;
+            }
+
+            return num;
+        };
+
+        const aParsed = parseValue(a);
+        const bParsed = parseValue(b);
+
+        return aParsed + bParsed;
+    }, 0);
+});
+
 
